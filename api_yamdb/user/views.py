@@ -7,9 +7,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.mail import send_mail
 from django.conf import settings
 
-from .models import User
+from django.contrib.auth import get_user_model
 
 from .serializers import UserSignupSerializer, ConfirmationCodeSerializer
+
+User = get_user_model()
 
 
 class SignupView(APIView):
@@ -39,3 +41,11 @@ class TokenView(APIView):
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfile(APIView):
+
+    def post(self, request):
+        pass
+
+    pass
