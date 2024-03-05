@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 
 
 # создала пока здесь после создания приложения user добавить импорт, убрать
@@ -36,17 +37,24 @@ class Genre(PublishedModel):
 
 
 class Title(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=256)
-    # подумать над годом
-    year = models.PositiveIntegerField(verbose_name='Год выпуска')
-    description = models.TextField(verbose_name='Описание')
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=256,
+        help_text='Название произведения, не более 256 символов'
+    )
+    year = models.PositiveIntegerField(
+        verbose_name='Год выпуска',
+        validators=[MaxValueValidator(timezone.now().year)],
+        help_text='Год выпуска произведения (не может быть больше текущего).'
+    )
+    description = models.TextField(verbose_name='Описание', blank=True)
     # Здесь возможно стоит делать через отдельную модель через атрибут through
     # но это не точно =)
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр',
         blank=True,
-        null=True,
+        # null=True,
         related_name='titles',
     )
     category = models.ForeignKey(
@@ -58,12 +66,12 @@ class Title(models.Model):
         related_name='titles'
     )
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
@@ -88,7 +96,7 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Произведение',
         related_name='reviews',
-        unique=True
+        # unique=True
     )
 
     # не уверена, что это нужно, но все же
@@ -101,7 +109,7 @@ class Review(models.Model):
         ordering = ['pub_date']
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     text = models.TextField(verbose_name='Текст комментария')
     author = models.ForeignKey(
         User,
