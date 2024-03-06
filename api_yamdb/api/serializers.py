@@ -30,8 +30,14 @@ class TitleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         return obj.reviews.all().count()
 
-    # def validate_category(self, value):
-    #     if value not in Category.objects.all().values('slug'):
-    #         raise serializers.ValidationError(
-    #             'Можно указать только существующую категорию')
-    #     return Category.objects.all().filter('slug')
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all())
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category')
+        model = Title

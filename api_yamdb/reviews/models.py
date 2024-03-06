@@ -16,7 +16,7 @@ class PublishedModel(models.Model):
 
     # возможно стоит поменять на слаг?
     def __str__(self):
-        return self.name
+        return self.slug
 
     class Meta:
         abstract = True
