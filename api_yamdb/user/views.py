@@ -9,10 +9,11 @@ from api_yamdb import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from django.core.mail import send_mail
 from django.conf import settings
-
 from django.contrib.auth import get_user_model
 
-from .serializers import UserSignupSerializer, ConfirmationCodeSerializer
+from .serializers import (UserSignupSerializer,
+                          ConfirmationCodeSerializer,
+                          UserProfileSerializer)
 
 User = get_user_model()
 
@@ -24,7 +25,6 @@ class SignupView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             email = serializer.validated_data['email']
-
             User.objects.create_user(
                 username=username,
                 email=email,
@@ -55,27 +55,28 @@ class TokenView(APIView):
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
 
-        if serializer.is_valid():
-            # Проверка кода подтверждения и выдача JWT-токена
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            email = serializer.validated_data['email']
-            confirmation_code = serializer.validated_data['confirmation_code']
-            user = get_object_or_404(User, email=email)
+        user = get_object_or_404(
+            User,
+            username=serializer.validated_data['username']
+        )
 
-            if default_token_generator.check_token(user, confirmation_code):
-                token = AccessToken.for_user(user).get('jti')
-                return Response({'token': token}, status=status.HTTP_200_OK)
-            else:
-                resp = {'confirmation_code': 'Неверный код подтверждения'}
-                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+        if default_token_generator.check_token(
+                user,
+                serializer.validated_data['confirmation_code']
+        ):
+            token = AccessToken.for_user(user).get('jti')
+            return Response({'token': token}, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+            resp = {'confirmation_code': 'Неверный код подтверждения'}
+            return Response(resp, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfile(APIView):
-
-    def post(self, request):
-        pass
-
-    pass
+class UserProfile(viewsets.ModelViewSet):
+    serializer_class = UserProfileSerializer
+    queryset = User.objects.all()
