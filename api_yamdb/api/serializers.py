@@ -1,22 +1,47 @@
+from django.db.models import Avg
 from rest_framework import serializers
-from reviews.models import Comment, Genre, Review, Title
+
+from reviews.models import Comment, Category, Genre, Review, Title
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+
 
 class TitleSerializer(serializers.ModelSerializer):
-    name = serializers.StringRelatedField()
-    year = serializers.DateField()
-    description = serializers.StringField()
-    genre = serializers.SlugRelatedField()
-    category = serializers.SlugRelatedField()
+    rating = serializers.SerializerMethodField(read_only=True)
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
 
-    rating = serializers.SerializerMethodField(default=None, read_only=True)
-       
+    class Meta:
+        fields = ('id', 'name', 'year', 'rating', 'description',
+                  'genre', 'category')
+        model = Title
+
     def get_rating(self, obj):
         return self.objects.objects.annotate(
-        rating=Avg('reviews__score')).order_by('-year')
-    
+            rating=Avg('reviews__score')).order_by('-year')
+
+
+class TitleCreateSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all())
+    genre = serializers.SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True)
+
     class Meta:
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category')
         model = Title
-        fields = ("id", "name", "year", "rating", "description", "genre", "category")
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -24,7 +49,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field="username",
         default=serializers.CurrentUserDefault(),
     )
-    
+
     def validate(self, attrs):
         if not self.context['request'].method == 'POST':
             return attrs
@@ -39,10 +64,11 @@ class ReviewSerializer(serializers.ModelSerializer):
                 )
             )
         return attrs
-    
+
     class Meta:
         model = Review
-        fields = ("id","text", "author", "score", "pub_date")
+        fields = ("id", "text", "author", "score", "pub_date")
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -50,8 +76,7 @@ class CommentSerializer(serializers.ModelSerializer):
         slug_field="username",
         default=serializers.CurrentUserDefault(),
     )
-    
+
     class Meta:
         model = Comment
-        fields = ("id","text", "author", "pub_date")
-    
+        fields = ("id", "text", "author", "pub_date")
