@@ -21,6 +21,14 @@ User = get_user_model()
 class SignupView(APIView):
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
+        if User.objects.filter(username=request.data.get('username')).exists():
+            if User.objects.filter(
+                    username=request.data.get('username'),
+                    email=request.data.get('email')
+            ).exists():
+                return Response('Вы уже зарегистрированы!', status=status.HTTP_200_OK)
+            return Response('Вы уже зарегистрированы!',
+                            status=status.HTTP_400_BAD_REQUEST)
 
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -55,26 +63,34 @@ class TokenView(APIView):
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
 
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
+        if not request.data.get('username'):
+            return Response("Нет данных в запросе!",
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=request.data.get('username')).exists():
+
+            if not serializer.is_valid():
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            user = get_object_or_404(
+                User,
+                username=serializer.validated_data['username']
             )
 
-        user = get_object_or_404(
-            User,
-            username=serializer.validated_data['username']
-        )
-
-        if default_token_generator.check_token(
-                user,
-                serializer.validated_data['confirmation_code']
-        ):
-            token = AccessToken.for_user(user).get('jti')
-            return Response({'token': token}, status=status.HTTP_200_OK)
+            if default_token_generator.check_token(
+                    user,
+                    serializer.validated_data['confirmation_code']
+            ):
+                token = AccessToken.for_user(user).get('jti')
+                return Response({'token': token}, status=status.HTTP_200_OK)
+            else:
+                resp = {'confirmation_code': 'Неверный код подтверждения'}
+                return Response(resp, status=status.HTTP_400_BAD_REQUEST)
         else:
-            resp = {'confirmation_code': 'Неверный код подтверждения'}
-            return Response(resp, status=status.HTTP_400_BAD_REQUEST)
+            return Response('Пользователь не найден', status=status.HTTP_404_NOT_FOUND)
 
 
 class UserProfile(viewsets.ModelViewSet):
