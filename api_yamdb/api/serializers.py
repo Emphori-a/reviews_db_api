@@ -8,7 +8,7 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField()
     category = serializers.SlugRelatedField()
 
-    rating = serializers.SerializerMethodField(default=None)
+    rating = serializers.SerializerMethodField(default=None, read_only=True)
        
     def get_rating(self, obj):
         return self.objects.objects.annotate(

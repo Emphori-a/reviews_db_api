@@ -1,5 +1,6 @@
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from django.shortcuts import render
 from reviews.models import Category, Genre, Review, Title, User
@@ -9,12 +10,13 @@ from .serializers import TitleSerializer, CommentSerializer, ReviewSerializer
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')).order_by('-year')
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (
         
     )
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category__slug', 'genre__slug', 'name', 'year')
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
