@@ -14,14 +14,11 @@ class UserSignupSerializer(serializers.Serializer):
     )
     email = serializers.EmailField(max_length=254)
 
-    def validate(self, attrs):
-        pass
+
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        max_length=150
-    )
+    email = serializers.EmailField(max_length=254)
     confirmation_code = serializers.CharField()
 
 

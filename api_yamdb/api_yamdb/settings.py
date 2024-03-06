@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 
@@ -109,6 +110,10 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 # Users model
 AUTH_USER_MODEL = 'user.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_mails')
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
