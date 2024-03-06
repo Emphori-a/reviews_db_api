@@ -150,3 +150,4 @@ media/
 
 /api_yamdb/user/migrations/
 /api_yamdb/reviews/migrations/
+/api_yamdb/sent_mails/
