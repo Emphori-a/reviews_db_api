@@ -2,11 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from user.models import User
+
 
 # создала пока здесь после создания приложения user добавить импорт, убрать
 # класс, не забыть поменять в settings AUTH_USER_MODEL(зарегать в админке?)
-class User(AbstractUser):
-    pass
+#class User(AbstractUser):
+#    pass
 
 
 class PublishedModel(models.Model):
