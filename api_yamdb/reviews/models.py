@@ -21,6 +21,7 @@ class Category(PublishedModel):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ['slug']
 
 
 class Genre(PublishedModel):
@@ -28,6 +29,7 @@ class Genre(PublishedModel):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ['slug']
 
 
 class Title(models.Model):
@@ -42,8 +44,6 @@ class Title(models.Model):
         help_text='Год выпуска произведения (не может быть больше текущего).'
     )
     description = models.TextField(verbose_name='Описание', blank=True)
-    # Здесь возможно стоит делать через отдельную модель через атрибут through
-    # но это не точно =)
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр',
@@ -62,6 +62,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        ordering = ['year']
 
     def __str__(self):
         return self.name

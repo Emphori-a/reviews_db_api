@@ -27,8 +27,10 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
-        return self.objects.objects.annotate(
-            rating=Avg('reviews__score')).order_by('-year')
+        return None
+    # в таком виде не работает, убрала пока
+        # return self.objects.objects.annotate(
+        #     rating=Avg('reviews__score')).order_by('-year')
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -41,6 +43,10 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'description',
                   'genre', 'category')
         model = Title
+
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
