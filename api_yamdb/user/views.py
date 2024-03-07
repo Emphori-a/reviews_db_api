@@ -1,8 +1,10 @@
+from urllib import response
+
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.decorators import action
 
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
@@ -15,6 +17,7 @@ from django.contrib.auth import get_user_model
 
 from .serializers import UserSignupSerializer, ConfirmationCodeSerializer, \
     UserProfileSerializer
+
 from .permissions import IsAdmin
 
 User = get_user_model()
@@ -103,9 +106,7 @@ class UserProfile(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
 
-    permission_classes = [IsAdmin | IsAdminUser]
-    search_fields = ('user__username',)
-
+    permission_classes = [IsAdmin | IsAuthenticated]
 
 
 

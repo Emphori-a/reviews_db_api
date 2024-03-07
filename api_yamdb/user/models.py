@@ -19,6 +19,7 @@ class CustomUserManager(BaseUserManager):
         if not re.match(r'^[\w.@+-]+\Z', str(username)):
             raise ValidationError(
                 'Пользователь содержит недопустимые символлы')
+
         email = self.normalize_email(email)
 
         user = self.model(
