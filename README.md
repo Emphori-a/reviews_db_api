@@ -139,11 +139,11 @@ comments/ - Комментарии к отзывам
 
 Семен Григорьев
 * https://github.com/haitaks
-* udieigetpaid@gmail.com
+* e-mail: udieigetpaid@gmail.com
 
 Алексей Мальцев
 * https://github.com/Thinker90
-* lexa.thinker@gmail.com
+* e-mail: lexa.thinker@gmail.com
 
 Мартынова Валерия
 * https://github.com/Emphori-a
