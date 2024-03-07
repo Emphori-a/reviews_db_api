@@ -22,9 +22,6 @@ class ConfirmationCodeSerializer(serializers.Serializer):
 
 class UserProfileSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
-    last_name = serializers.CharField(max_length=150)
-    email = serializers.CharField(max_length=254)
-    username = serializers.CharField(max_length=150)
 
     class Meta:
         model = User

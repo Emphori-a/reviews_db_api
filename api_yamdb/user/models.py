@@ -55,8 +55,8 @@ class User(AbstractUser):
     username = models.CharField('username', max_length=150, unique=True)
     bio = models.TextField(blank=True)
     email = models.EmailField('email', max_length=254, unique=True)
-    first_name = models.CharField('name', max_length=150, blank=True)
-    last_name = models.CharField('surname', max_length=150, blank=True)
+    first_name = models.CharField('first_name', max_length=150, blank=True)
+    last_name = models.CharField('last_name', max_length=150, blank=True)
 
     objects = CustomUserManager()
 
