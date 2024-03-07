@@ -1,19 +1,20 @@
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework import permissions, viewsets
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.decorators import action
 
+from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator
-from api_yamdb import settings
+
 from rest_framework_simplejwt.tokens import AccessToken
 from django.core.mail import send_mail
 from django.conf import settings
+
 from django.contrib.auth import get_user_model
 
-from .serializers import (UserSignupSerializer,
-                          ConfirmationCodeSerializer,
-                          UserProfileSerializer)
+from .serializers import UserSignupSerializer, ConfirmationCodeSerializer, UserProfileSerializer
+from .permissions import IsAdmin
 
 User = get_user_model()
 
@@ -33,6 +34,7 @@ class SignupView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data['username']
             email = serializer.validated_data['email']
+
             User.objects.create_user(
                 username=username,
                 email=email,
@@ -53,7 +55,7 @@ class SignupView(APIView):
                 fail_silently=False
             )
 
-            return Response(status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors,
                             status=status.HTTP_400_BAD_REQUEST)
@@ -94,5 +96,9 @@ class TokenView(APIView):
 
 
 class UserProfile(viewsets.ModelViewSet):
-    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+
+    permission_classes = [IsAdminUser]
+
+
