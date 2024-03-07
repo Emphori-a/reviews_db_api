@@ -104,6 +104,5 @@ class UserProfile(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
 
     permission_classes = [IsAdminUser]
-    def perform_create(self, serializer):
-        serializer.save()
+
 
