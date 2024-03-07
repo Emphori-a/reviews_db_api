@@ -103,6 +103,12 @@ class UserProfile(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
 
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdmin | IsAdminUser]
+    search_fields = ('user__username',)
+
+
+
+
+
 
 

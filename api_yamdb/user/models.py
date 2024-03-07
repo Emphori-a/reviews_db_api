@@ -34,11 +34,16 @@ class CustomUserManager(BaseUserManager):
         return user
 
 
+USER = 'user'
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+
+
 class User(AbstractUser):
     ROLE = [
-        ('user', 'User'),
-        ('moderator', 'Moderator'),
-        ('admin', 'Admin'),
+        ('USER', 'User'),
+        ('MODERATOR', 'Moderator'),
+        ('ADMIN', 'Admin'),
     ]
     role = models.CharField(
         choices=ROLE,
@@ -53,6 +58,14 @@ class User(AbstractUser):
     last_name = models.CharField('surname', max_length=150, blank=True)
 
     objects = CustomUserManager()
+
+    def is_admin(self):
+        return (self.role == ADMIN
+                or self.is_staff or self.is_superuser)
+
+    def is_moderator(self):
+        return (self.role == MODERATOR
+                or self.is_staff or self.is_superuser)
 
     class Meta:
         verbose_name = 'user'
