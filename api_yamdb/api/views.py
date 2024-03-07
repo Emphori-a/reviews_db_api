@@ -29,11 +29,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Method "PUT" not allowed.'},
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def partial_update(self, request, *args, **kwargs):
-        n = 0
-        print(n)
-        return super().partial_update(request, *args, **kwargs)
-
 
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
