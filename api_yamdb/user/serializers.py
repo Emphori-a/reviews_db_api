@@ -16,7 +16,7 @@ class UserSignupSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254)
 
 class ConfirmationCodeSerializer(serializers.Serializer):
-    username = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=254)
     confirmation_code = serializers.CharField()
 
 
