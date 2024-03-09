@@ -9,14 +9,14 @@ MODERATOR = 'moderator'
 
 class User(AbstractUser):
     ROLE = [
-        ('USER', 'User'),
-        ('MODERATOR', 'Moderator'),
-        ('ADMIN', 'Admin'),
+        ('user', 'Пользователь'),
+        ('moderator', 'Модератор'),
+        ('admin', 'Администратор'),
     ]
     role = models.CharField(
         verbose_name='Роль',
         choices=ROLE,
-        default='user',
+        default=USER,
         max_length=25,
         blank=True
     )
