@@ -1,24 +1,19 @@
-from urllib import response
-
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator
-
 from rest_framework_simplejwt.tokens import AccessToken
-from django.core.mail import send_mail
-from django.conf import settings
 
-from django.contrib.auth import get_user_model
+from .permissions import IsOwnerOrIsAdmin
+from .serializers import (UserSignupSerializer,
+                          ConfirmationCodeSerializer,
+                          UserProfileSerializer)
 
-from .serializers import UserSignupSerializer, ConfirmationCodeSerializer, \
-    UserProfileSerializer
-
-from .permissions import IsAdmin
 
 User = get_user_model()
 
@@ -102,14 +97,9 @@ class TokenView(APIView):
         return Response({'token': token}, status=status.HTTP_200_OK)
 
 
-class UserProfile(viewsets.ModelViewSet):
+class UserProfileSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrIsAdmin]
 
-    permission_classes = [IsAdmin | IsAuthenticated]
-
-
-
-
-
-
+    lookup_field = 'username'

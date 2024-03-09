@@ -1,38 +1,5 @@
-import re
-from django.contrib.auth.models import AbstractUser, BaseUserManager
-from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-
-class CustomUserManager(BaseUserManager):
-
-    def create_user(self,
-                    role='',
-                    username='',
-                    bio='',
-                    email='',
-                    first_name='',
-                    last_name='',
-                    **extra_fields):
-        if username == 'me':
-            raise ValidationError('Недопустимое имя пользователя')
-        if not re.match(r'^[\w.@+-]+\Z', str(username)):
-            raise ValidationError(
-                'Пользователь содержит недопустимые символлы')
-
-        email = self.normalize_email(email)
-
-        user = self.model(
-            role=role,
-            username=username,
-            bio=bio,
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            **extra_fields
-        )
-        user.save(using=self.db)
-        return user
 
 
 USER = 'user'
@@ -47,18 +14,33 @@ class User(AbstractUser):
         ('ADMIN', 'Admin'),
     ]
     role = models.CharField(
+        verbose_name='Роль',
         choices=ROLE,
         default='user',
         max_length=25,
         blank=True
     )
-    username = models.CharField('username', max_length=150, unique=True)
-    bio = models.TextField(blank=True)
-    email = models.EmailField('email', max_length=254, unique=True)
-    first_name = models.CharField('first_name', max_length=150, blank=True)
-    last_name = models.CharField('last_name', max_length=150, blank=True)
-
-    objects = CustomUserManager()
+    username = models.CharField(
+        verbose_name='Имя пользователя',
+        max_length=150,
+        unique=True
+    )
+    bio = models.TextField(verbose_name='Биография', blank=True)
+    email = models.EmailField(
+        verbose_name='Адрес электронной почты',
+        max_length=254,
+        unique=True
+    )
+    first_name = models.CharField(
+        verbose_name='Имя',
+        max_length=150,
+        blank=True
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия',
+        max_length=150,
+        blank=True
+    )
 
     def is_admin(self):
         return (self.role == ADMIN
@@ -69,5 +51,15 @@ class User(AbstractUser):
                 or self.is_staff or self.is_superuser)
 
     class Meta:
-        verbose_name = 'user'
-        verbose_name_plural = 'users'
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ['username']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email'
+            )
+        ]
+
+    def __str__(self):
+        return self.username
