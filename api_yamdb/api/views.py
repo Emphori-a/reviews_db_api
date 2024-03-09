@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Category, Genre, Review, Title
@@ -18,9 +19,15 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilterSet
 
     def get_serializer_class(self):
-        if self.action in ('create', 'partial_update'):
+        if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleSerializer
+
+    def update(self, request, *args, **kwargs):
+        if kwargs.get('partial'):
+            return super().update(request, *args, **kwargs)
+        return Response({'detail': 'Method "PUT" not allowed.'},
+                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
