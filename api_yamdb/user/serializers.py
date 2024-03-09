@@ -3,14 +3,10 @@ import re
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-
 User = get_user_model()
 
 
-class UserSignupSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    email = serializers.EmailField(max_length=254)
-
+class CheckUserSerializer:
     def validate_username(self, username):
         if username == 'me':
             raise serializers.ValidationError(
@@ -22,6 +18,11 @@ class UserSignupSerializer(serializers.Serializer):
                  'цифры и знаки @ / . / + / - / _')
             )
         return username
+
+
+class UserSignupSerializer(serializers.Serializer, CheckUserSerializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
@@ -29,7 +30,7 @@ class ConfirmationCodeSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField()
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer, CheckUserSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name',
@@ -37,15 +38,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'username'}
         }
-
-    def validate_username(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Недопустимое имя пользователя.'
-            )
-        if not re.match(r'^[\w.@+-]+\Z', username):
-            raise serializers.ValidationError(
-                ('Имя пользователя может содержать только буквы, '
-                 'цифры и знаки @ / . / + / - / _')
-            )
-        return username
