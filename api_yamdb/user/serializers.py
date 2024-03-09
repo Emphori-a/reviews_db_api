@@ -1,9 +1,9 @@
 import re
 from abc import ABC
 
-from rest_framework import serializers, status
-
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
 
 User = get_user_model()
 
