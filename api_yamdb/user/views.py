@@ -18,7 +18,9 @@ from django.contrib.auth import get_user_model
 from .serializers import UserSignupSerializer, ConfirmationCodeSerializer, \
     UserProfileSerializer
 
-from .permissions import IsAdmin
+from .permissions import IsOwnerOrIsAdmin
+
+
 
 User = get_user_model()
 
@@ -102,11 +104,13 @@ class TokenView(APIView):
         return Response({'token': token}, status=status.HTTP_200_OK)
 
 
-class UserProfile(viewsets.ModelViewSet):
+class UserProfileSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrIsAdmin]
 
-    permission_classes = [IsAdmin | IsAuthenticated]
+    lookup_field = 'username'
+
 
 
 

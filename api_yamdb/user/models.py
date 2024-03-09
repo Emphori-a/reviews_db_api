@@ -1,39 +1,5 @@
-import re
-from django.contrib.auth.models import AbstractUser, BaseUserManager
-from rest_framework.exceptions import ValidationError
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
-
-class CustomUserManager(BaseUserManager):
-
-    def create_user(self,
-                    role='',
-                    username='',
-                    bio='',
-                    email='',
-                    first_name='',
-                    last_name='',
-                    **extra_fields):
-        if username == 'me':
-            raise ValidationError('Недопустимое имя пользователя')
-        if not re.match(r'^[\w.@+-]+\Z', str(username)):
-            raise ValidationError(
-                'Пользователь содержит недопустимые символлы')
-
-        email = self.normalize_email(email)
-
-        user = self.model(
-            role=role,
-            username=username,
-            bio=bio,
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            **extra_fields
-        )
-        user.save(using=self.db)
-        return user
-
 
 USER = 'user'
 ADMIN = 'admin'
@@ -57,8 +23,6 @@ class User(AbstractUser):
     email = models.EmailField('email', max_length=254, unique=True)
     first_name = models.CharField('first_name', max_length=150, blank=True)
     last_name = models.CharField('last_name', max_length=150, blank=True)
-
-    objects = CustomUserManager()
 
     def is_admin(self):
         return (self.role == ADMIN
