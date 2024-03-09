@@ -1,5 +1,4 @@
 import re
-from abc import ABC
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -35,7 +34,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
-        lookup_field = 'username'
         extra_kwargs = {
             'url': {'lookup_field': 'username'}
         }
