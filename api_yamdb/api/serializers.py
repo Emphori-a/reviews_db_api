@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import Comment, Category, Genre, Review, Title
@@ -17,20 +16,14 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
 
     class Meta:
-        fields = ('id', 'name', 'year', 'rating', 'description',
-                  'genre', 'category')
         model = Title
-
-    def get_rating(self, obj):
-        return None
-    # в таком виде не работает, убрала пока
-        # return self.objects.objects.annotate(
-        #     rating=Avg('reviews__score')).order_by('-year')
+        fields = ('id', 'name', 'year', 'description', 'rating',
+                  'genre', 'category')
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):
@@ -52,8 +45,7 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field="username",
-        default=serializers.CurrentUserDefault(),
+        slug_field='username',
     )
 
     def validate(self, attrs):
@@ -73,16 +65,15 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ("id", "text", "author", "score", "pub_date")
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field="username",
-        default=serializers.CurrentUserDefault(),
+        slug_field='username',
     )
 
     class Meta:
         model = Comment
-        fields = ("id", "text", "author", "pub_date")
+        fields = ('id', 'text', 'author', 'pub_date')

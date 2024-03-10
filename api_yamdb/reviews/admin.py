@@ -40,9 +40,11 @@ class GenreAdmin(admin.ModelAdmin):
     search_fields = ('slug',)
     list_per_page = 10
 
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

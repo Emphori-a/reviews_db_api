@@ -1,7 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
-
 from user.models import User
 
 
@@ -71,6 +70,8 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     score = models.IntegerField(
+        blank=True,
+        null=True,
         verbose_name='Оценка',
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         help_text='Минимальная оценка - 1, максимальная оценка - 10'
@@ -90,10 +91,8 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Произведение',
         related_name='reviews',
-        # unique=True
     )
 
-    # не уверена, что это нужно, но все же
     def __str__(self):
         return self.text[:15]
 
@@ -101,6 +100,12 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = ['pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_author_title'
+            )
+        ]
 
 
 class Comment(models.Model):
@@ -119,6 +124,10 @@ class Comment(models.Model):
         Review,
         on_delete=models.CASCADE,
         verbose_name='Отзыв',
-        null=True,
         related_name='comments'
     )
+
+    class Meta:
+        ordering = ('-pub_date',)
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
