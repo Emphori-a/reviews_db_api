@@ -64,6 +64,14 @@ python3 manage.py migrate
 python3 manage.py runserver
 ```
 
+### Наполнение БД:
+
+Для наполнения БД из csv-файлов используйте команду
+```
+python3 api_yamdb/manage.py import_csv ./api_yamdb/static/data/
+```
+
+
 ### API:
 
 Подробная документация API - http://127.0.0.1:8000/redoc/

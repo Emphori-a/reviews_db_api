@@ -19,4 +19,3 @@ class IsOwnerOrIsAdmin(permissions.IsAdminUser):
                  and (request.user.is_admin()
                       or request.user.is_superuser))
                 or obj.author == request.user)
-

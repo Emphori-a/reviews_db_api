@@ -1,19 +1,22 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
 
 from reviews.models import Category, Genre, Review, Title
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
 from .viewsets import CreateListDestroyViewSet
-from .permissions import IsAdminOrReadOnly
+from .permissions import (IsAdminOrReadOnly,
+                          IsModeratorIsAdminIsAuthorOrReadOnly)
 from .filters import TitleFilterSet
+from .mixins import PutNotAllowed
 
 
-class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+class TitleViewSet(viewsets.ModelViewSet, PutNotAllowed):
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('-year')
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilterSet
@@ -22,12 +25,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.action in ('create', 'update', 'partial_update'):
             return TitleCreateSerializer
         return TitleSerializer
-
-    def update(self, request, *args, **kwargs):
-        if kwargs.get('partial'):
-            return super().update(request, *args, **kwargs)
-        return Response({'detail': 'Method "PUT" not allowed.'},
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
@@ -40,34 +37,31 @@ class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet, PutNotAllowed):
     serializer_class = ReviewSerializer
-    # написать пермишены
-    # permission_classes = (
+    permission_classes = [
+        IsModeratorIsAdminIsAuthorOrReadOnly]
 
-    # )
-
-    def get_title(self):
+    def _get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get("title_id"))
 
     def get_queryset(self):
-        return self.get_title().reviews.all()
+        return self._get_title().reviews.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, review=self.get_title())
+        serializer.save(author=self.request.user, title=self._get_title())
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet, PutNotAllowed):
     serializer_class = CommentSerializer
-    # permission_classes = (
+    permission_classes = [
+        IsModeratorIsAdminIsAuthorOrReadOnly]
 
-    # )
-
-    def get_review(self):
+    def _get_review(self):
         return get_object_or_404(Review, id=self.kwargs.get("review_id"))
 
     def get_queryset(self):
-        return self.get_review().comments.all()
+        return self._get_review().comments.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, review=self.get_review())
+        serializer.save(author=self.request.user, review=self._get_review())

@@ -14,6 +14,7 @@ from .permissions import IsOwnerOrIsAdmin
 from .serializers import (UserSignupSerializer,
                           ConfirmationCodeSerializer,
                           UserProfileSerializer)
+from api.mixins import PutNotAllowed
 
 
 User = get_user_model()
@@ -98,7 +99,7 @@ class TokenView(APIView):
         return Response({'token': token}, status=status.HTTP_200_OK)
 
 
-class UserProfileSet(viewsets.ModelViewSet):
+class UserProfileSet(viewsets.ModelViewSet, PutNotAllowed):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrIsAdmin]
@@ -127,9 +128,3 @@ class UserProfileSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(role=request.user.role, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def update(self, request, *args, **kwargs):
-        if kwargs.get('partial'):
-            return super().update(request, *args, **kwargs)
-        return Response({'detail': 'Method "PUT" not allowed.'},
-                        status=status.HTTP_405_METHOD_NOT_ALLOWED)
