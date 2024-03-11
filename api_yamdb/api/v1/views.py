@@ -8,7 +8,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           TitleCreateSerializer, TitleSerializer)
 from .viewsets import CreateListDestroyViewSet, ReviewCommentViewSet
-from .permissions import (IsAdminOrReadOnly)
+from .permissions import IsAdminOrReadOnly
 from .filters import TitleFilterSet
 
 
