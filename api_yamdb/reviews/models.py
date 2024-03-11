@@ -1,10 +1,10 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.utils import timezone
 
 from api_yamdb.settings import (MAX_LENGTH_NAME, MAX_LENGTH_SLUG, MIN_SCORE,
                                 MAX_SCORE, LEN_TEXT_TO_REPRESENT)
 from user.models import User
+from .validators import validate_year
 
 
 class PublishedModel(models.Model):
@@ -43,8 +43,8 @@ class Title(models.Model):
     )
     year = models.SmallIntegerField(
         verbose_name='Год выпуска',
-        validators=[MaxValueValidator(timezone.now().year)],
-        help_text='Год выпуска произведения (не может быть больше текущего).'
+        validators=[validate_year],
+        help_text='Год выпуска произведения не может быть больше текущего.'
     )
     description = models.TextField(verbose_name='Описание', blank=True)
     genre = models.ManyToManyField(
