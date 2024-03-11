@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title
 from .serializers import (
@@ -81,7 +82,12 @@ class TokenView(APIView):
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response({'token': str(
+            AccessToken.for_user(
+                serializer.validated_data['username']
+            )
+        )
+        }, status=status.HTTP_200_OK)
 
 
 class UserProfileSet(viewsets.ModelViewSet):

@@ -4,7 +4,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Comment, Category, Genre, Review, Title
 from api_yamdb.settings import MAX_LENGTH_USER, MAX_LENGTH_EMAIL
@@ -142,7 +141,6 @@ class ConfirmationCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError("Нет данных в запросе!")
 
         user = get_object_or_404(User, username=data.get('username'))
-        # code = data.get('confirmation_code')
 
         if not default_token_generator.check_token(
                 user,
@@ -150,7 +148,7 @@ class ConfirmationCodeSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError('Неверный код подтверждения')
 
-        return {'token': str(AccessToken.for_user(user))}
+        return data
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
