@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api_yamdb.settings import (MAX_LENGTH_ROLE, MAX_LENGTH_USER)
+
 
 USER = 'user'
 ADMIN = 'admin'
@@ -17,12 +19,12 @@ class User(AbstractUser):
         verbose_name='Роль',
         choices=ROLE,
         default=USER,
-        max_length=25,
+        max_length=MAX_LENGTH_ROLE,
         blank=True
     )
     username = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
         unique=True
     )
     bio = models.TextField(verbose_name='Биография', blank=True)
@@ -33,12 +35,12 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
         blank=True
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
         blank=True
     )
 
