@@ -26,11 +26,11 @@ class UserSignupSerializer(serializers.Serializer, CheckUserSerializer):
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=254)
+    username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField()
 
 
-class UserProfileSerializer(serializers.ModelSerializer, CheckUserSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name',

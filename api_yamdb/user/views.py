@@ -3,11 +3,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import IsOwnerOrIsAdmin
@@ -20,19 +22,14 @@ from api.mixins import PutNotAllowed
 User = get_user_model()
 
 
-def send_email(username, email):
-    user = User.objects.get(username=username, email=email)
+def send_email(user):
     confirmation_code = default_token_generator.make_token(user)
-
-    mail_subject = f'Код подтверждения для пользователя {username}'
-    message = f'Ваш {mail_subject.lower()}: {confirmation_code}'
-    sender_email = settings.DEFAULT_FROM_EMAIL
-    recipient_email = email
     send_mail(
-        mail_subject,
-        message,
-        sender_email,
-        [recipient_email],
+        f'Код подтверждения для пользователя {user.username}',
+        f'Ваш Код подтверждения для пользователя {user.username}: '
+        f'{confirmation_code}',
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
         fail_silently=False
     )
 
@@ -52,15 +49,9 @@ class SignupView(APIView):
             return Response('Такой пользователь уже зарегистрирован',
                             status=status.HTTP_400_BAD_REQUEST)
 
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-        username = serializer.validated_data['username']
-        email = serializer.validated_data['email']
-
-        User.objects.create_user(username=username, email=email)
-        send_email(username=username, email=email)
+        serializer.is_valid(raise_exception=True)
+        user, created = User.objects.get_or_create(username=username, email=email)
+        send_email(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -77,11 +68,7 @@ class TokenView(APIView):
             return Response('Пользователь не найден',
                             status=status.HTTP_404_NOT_FOUND)
 
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
 
         user = get_object_or_404(
             User,
@@ -95,8 +82,8 @@ class TokenView(APIView):
             resp = {'confirmation_code': 'Неверный код подтверждения'}
             return Response(resp, status=status.HTTP_400_BAD_REQUEST)
 
-        token = AccessToken.for_user(user).get('jti')
-        return Response({'token': token}, status=status.HTTP_200_OK)
+        token = AccessToken.for_user(user)
+        return Response({'token': str(token)}, status=status.HTTP_200_OK)
 
 
 class UserProfileSet(viewsets.ModelViewSet, PutNotAllowed):
