@@ -11,7 +11,7 @@ from .viewsets import CreateListDestroyViewSet
 from .permissions import (IsAdminOrReadOnly,
                           IsModeratorIsAdminIsAuthorOrReadOnly)
 from .filters import TitleFilterSet
-from .mixins import PutNotAllowed
+from ..mixins import PutNotAllowed
 
 
 class TitleViewSet(viewsets.ModelViewSet, PutNotAllowed):
