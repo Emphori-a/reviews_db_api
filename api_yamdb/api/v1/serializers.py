@@ -5,8 +5,8 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import Comment, Category, Genre, Review, Title
 from api_yamdb.settings import MAX_LENGTH_USER, MAX_LENGTH_EMAIL
+from reviews.models import Comment, Category, Genre, Review, Title
 from user.validators import validate_username_not_me, validate_username_symbols
 
 

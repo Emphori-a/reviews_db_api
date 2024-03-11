@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins
-from rest_framework import filters, viewsets
+from rest_framework import filters, mixins, viewsets
 
 from reviews.models import Title
 from .permissions import (IsAdminOrReadOnly,
