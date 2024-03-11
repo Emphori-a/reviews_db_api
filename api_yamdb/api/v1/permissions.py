@@ -10,7 +10,7 @@ class IsAdminOrReadOnly(permissions.IsAdminUser):
 
 
 class IsModeratorIsAdminIsAuthorOrReadOnly(
-    permissions.IsAuthenticatedOrReadOnly):
+        permissions.IsAuthenticatedOrReadOnly):
 
     def has_object_permission(self, request, view, obj):
         return ((request.user.is_authenticated
@@ -31,5 +31,5 @@ class IsOwnerOrIsAdmin(permissions.IsAdminUser):
 
     def has_object_permission(self, request, view, obj):
         return (request.user.is_authenticated
-                 and (request.user.is_admin()
-                or obj.author == request.user))
+                and (request.user.is_admin()
+                     or obj.author == request.user))
