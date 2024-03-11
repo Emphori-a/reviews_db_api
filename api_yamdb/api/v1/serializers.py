@@ -16,7 +16,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(read_only=True)
+    rating = serializers.IntegerField(read_only=True, default=None)
     category = CategorySerializer()
     genre = GenreSerializer(many=True)
 
@@ -30,7 +30,8 @@ class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all())
     genre = serializers.SlugRelatedField(
-        slug_field='slug', queryset=Genre.objects.all(), many=True)
+        slug_field='slug', queryset=Genre.objects.all(), many=True,
+        allow_null=True, allow_empty=False)
 
     class Meta:
         fields = ('id', 'name', 'year', 'description',
@@ -49,7 +50,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, attrs):
-        if not self.context['request'].method == 'POST':
+        if self.context['request'].method != 'POST':
             return attrs
         if Review.objects.filter(
             title_id=self.context['view'].kwargs.get('title_id'),

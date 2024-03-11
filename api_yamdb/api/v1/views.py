@@ -11,15 +11,15 @@ from .viewsets import CreateListDestroyViewSet
 from .permissions import (IsAdminOrReadOnly,
                           IsModeratorIsAdminIsAuthorOrReadOnly)
 from .filters import TitleFilterSet
-from ..mixins import PutNotAllowed
 
 
-class TitleViewSet(viewsets.ModelViewSet, PutNotAllowed):
+class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('-year')
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilterSet
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
@@ -37,13 +37,14 @@ class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
 
 
-class ReviewViewSet(viewsets.ModelViewSet, PutNotAllowed):
+class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [
         IsModeratorIsAdminIsAuthorOrReadOnly]
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def _get_title(self):
-        return get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
     def get_queryset(self):
         return self._get_title().reviews.all()
@@ -52,13 +53,14 @@ class ReviewViewSet(viewsets.ModelViewSet, PutNotAllowed):
         serializer.save(author=self.request.user, title=self._get_title())
 
 
-class CommentViewSet(viewsets.ModelViewSet, PutNotAllowed):
+class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [
         IsModeratorIsAdminIsAuthorOrReadOnly]
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def _get_review(self):
-        return get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
 
     def get_queryset(self):
         return self._get_review().comments.all()

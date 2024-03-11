@@ -14,7 +14,6 @@ from .permissions import IsOwnerOrIsAdmin
 from .serializers import (UserSignupSerializer,
                           ConfirmationCodeSerializer,
                           UserProfileSerializer)
-from api.mixins import PutNotAllowed
 
 
 User = get_user_model()
@@ -99,13 +98,14 @@ class TokenView(APIView):
         return Response({'token': token}, status=status.HTTP_200_OK)
 
 
-class UserProfileSet(viewsets.ModelViewSet, PutNotAllowed):
+class UserProfileSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrIsAdmin]
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     @action(
         detail=False,
