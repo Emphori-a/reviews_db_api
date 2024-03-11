@@ -1,51 +1,52 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
+from api_yamdb.settings import (ADMIN, MODERATOR, MAX_LENGTH_ROLE,
+                                MAX_LENGTH_USER)
+from .validators import validate_username_not_me, validate_username_symbols
 
 
 class User(AbstractUser):
-    ROLE = [
-        ('user', 'Пользователь'),
-        ('moderator', 'Модератор'),
-        ('admin', 'Администратор'),
-    ]
+    class Role(models.TextChoices):
+        USER = 'user', 'Пользователь'
+        ADMIN = 'admin', 'Администратор'
+        MODERATOR = 'moderator', 'Модератор'
+
     role = models.CharField(
         verbose_name='Роль',
-        choices=ROLE,
-        default=USER,
-        max_length=25,
+        choices=Role.choices,
+        default=Role.USER,
+        max_length=MAX_LENGTH_ROLE,
         blank=True
     )
     username = models.CharField(
         verbose_name='Имя пользователя',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
+        validators=[validate_username_not_me, validate_username_symbols],
         unique=True
     )
     bio = models.TextField(verbose_name='Биография', blank=True)
     email = models.EmailField(
         verbose_name='Адрес электронной почты',
-        max_length=254,
         unique=True
     )
     first_name = models.CharField(
         verbose_name='Имя',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
         blank=True
     )
     last_name = models.CharField(
         verbose_name='Фамилия',
-        max_length=150,
+        max_length=MAX_LENGTH_USER,
         blank=True
     )
 
+    @property
     def is_admin(self):
         return (self.role == ADMIN
                 or self.is_staff or self.is_superuser)
 
+    @property
     def is_moderator(self):
         return (self.role == MODERATOR
                 or self.is_staff or self.is_superuser)
