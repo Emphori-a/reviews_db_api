@@ -74,8 +74,6 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва')
     score = models.IntegerField(
-        blank=True,
-        null=True,
         verbose_name='Оценка',
         validators=[MinValueValidator(MIN_SCORE),
                     MaxValueValidator(MAX_SCORE)],

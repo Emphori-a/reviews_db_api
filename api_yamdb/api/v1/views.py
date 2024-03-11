@@ -1,15 +1,24 @@
 from django.db.models import Avg
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from reviews.models import Category, Genre, Review, Title
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ReviewSerializer,
-                          TitleCreateSerializer, TitleSerializer)
+from .serializers import (
+    CategorySerializer, CommentSerializer, ConfirmationCodeSerializer,
+    GenreSerializer, ReviewSerializer, TitleCreateSerializer, TitleSerializer,
+    UserSignupSerializer, UserProfileSerializer)
 from .viewsets import CreateListDestroyViewSet, ReviewCommentViewSet
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .filters import TitleFilterSet
+
+
+User = get_user_model()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -58,3 +67,50 @@ class CommentViewSet(ReviewCommentViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self._get_review())
+
+
+class SignupView(APIView):
+    def post(self, request):
+        serializer = UserSignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TokenView(APIView):
+    def post(self, request):
+        serializer = ConfirmationCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+class UserProfileSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAdmin, )
+    lookup_field = 'username'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    http_method_names = ('get', 'post', 'patch', 'delete')
+
+    @action(
+        detail=False,
+        url_path='me',
+        methods=['GET', 'PATCH'],
+        permission_classes=[IsAuthenticated]
+    )
+    def get_user_selfpage(self, request):
+        if request.method == 'GET':
+            serializer = UserProfileSerializer(request.user)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+        serializer = UserProfileSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
