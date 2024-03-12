@@ -133,13 +133,13 @@ class UserSignupSerializer(serializers.Serializer):
 
 
 class ConfirmationCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=MAX_LENGTH_USER)
+    username = serializers.CharField(
+        max_length=MAX_LENGTH_USER,
+        validators=[validate_username_not_me, validate_username_symbols]
+    )
     confirmation_code = serializers.CharField()
 
     def validate(self, data):
-        if not data.get('username'):
-            raise serializers.ValidationError("Нет данных в запросе!")
-
         user = get_object_or_404(User, username=data.get('username'))
 
         if not default_token_generator.check_token(
