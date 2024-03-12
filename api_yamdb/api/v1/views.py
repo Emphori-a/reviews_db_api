@@ -82,11 +82,10 @@ class TokenView(APIView):
     def post(self, request):
         serializer = ConfirmationCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = get_object_or_404(
+            User, username=serializer.validated_data['username'])
         return Response({'token': str(
-            AccessToken.for_user(
-                serializer.validated_data['username']
-            )
-        )
+            AccessToken.for_user(user))
         }, status=status.HTTP_200_OK)
 
 
