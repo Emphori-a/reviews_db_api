@@ -118,5 +118,6 @@ auth/ - Регистрация пользователей и выдача ток
 
 Мартынова Валерия
 * https://github.com/Emphori-a
-* e-mail: emphoria@yandex.ru
+* e-mail: v.e.martynova@yandex.ru
+* Telegram: @Emphori
 
